@@ -17,11 +17,11 @@ $productos = [
     </tr>
   </thead>
   <tbody>
-    <?php foreach ($productos as $nombre => $precio): ?>
+    <?php for ($i = 0; $i < count($productos); $i++): ?>
       <tr>
-        <td><?= htmlspecialchars($nombre) ?></td>
-        <td><?= number_format($precio, 2, ',', '.') ?></td>
+        <td><?= htmlspecialchars(array_keys($productos)[$i]) ?></td>
+        <td><?= number_format(array_values($productos)[$i], 2, ',', '.') ?></td>
       </tr>
-    <?php endforeach; ?>
+    <?php endfor; ?>
   </tbody>
 </table>
