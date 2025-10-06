@@ -3,7 +3,8 @@
 $productos = [
   "Pan de Camas"        => 1.20,
   "Aceitunas aliñadas"  => 2.50,
-  "Tortas de aceite"    => 3.00
+  "Tortas de aceite"    => 3.00,
+  "Mermelada de naranja" => 2.00
 ];
 ?>
 
@@ -19,7 +20,7 @@ $productos = [
   <tbody>
     <?php for ($i = 0; $i < count($productos); $i++): ?>
       <tr>
-        <td><?= htmlspecialchars(array_keys($productos)[$i]) ?></td>
+        <td><?= htmlspecialchas(array_keys($productos)[$i]) ?></td>
         <td><?= number_format(array_values($productos)[$i], 2, ',', '.') ?></td>
       </tr>
     <?php endfor; ?>
