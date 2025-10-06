@@ -1,8 +1,11 @@
 <?php
-$productos = ["Pan de Camas", "Aceitunas aliñadas", "Tortas de aceite"];
-foreach ($productos as $p) {
-  echo "<li class='list-group-item'>" . htmlspecialchars($p) . "</li>";
-}
+// Estructura asociativa: producto => precio
+$productos = [
+  "Pan de Camas"        => 1.20,
+  "Aceitunas aliñadas"  => 2.50,
+  "Tortas de aceite"    => 3.00,
+  "Tarta de queso" => 2.00
+];
 ?>
 
 <h2 class="text-success text-center mt-4">Productos locales de Camas</h2>
@@ -15,11 +18,11 @@ foreach ($productos as $p) {
     </tr>
   </thead>
   <tbody>
-    <?php foreach ($productos as $nombre => $precio): ?>
+    <?php for ($i = 0; $i < count($productos); $i++): ?>
       <tr>
-        <td><?= htmlspecialchars($nombre) ?></td>
-        <td><?= number_format($precio, 2, ',', '.') ?></td>
+        <td><?= htmlspecialchars(array_keys($productos)[$i]) ?></td>
+        <td><?= number_format(array_values($productos)[$i], 2, ',', '.') ?></td>
       </tr>
-    <?php endforeach; ?>
+    <?php endfor; ?>
   </tbody>
 </table>
