@@ -28,7 +28,8 @@ ini_set('display_errors','1');
     <!-- Contenido principal -->
     <main class="mt-4">
       <?php
-        $cnt = __DIR__ . '/elementos/contenido.php';
+        //$cnt = __DIR__ . '/elementos/contenido.php';
+        $cnt = __DIR__ . "/elementos/{$p}.php";
         if (is_file($cnt) && is_readable($cnt)) {
           require_once $cnt;
         } else {

@@ -1,5 +1,11 @@
 <?php
 $titulo = "Mi primer sitio modular con PHP";
-$contenido = "elementos/contenido.php";
+
+$p = $_GET['p'] ?? 'inicio';
+$menu = [
+  'inicio' => 'Inicio',
+  'contenido' => 'Productos',
+  'contacto' => 'Contacto'
+];
 
 include "layout.php";
