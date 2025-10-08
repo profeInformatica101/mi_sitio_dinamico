@@ -1,7 +1,13 @@
 <?php
 // Debug temporal
-error_reporting(E_ALL);
-ini_set('display_errors','1');
+error_reporting(E_ALL);  //Es muy útil durante el desarrollo, porque te permite ver cualquier problema en el código.
+ini_set('display_errors','1'); // '1' significa “activar” la visualización (mostrar los errores)
+
+/** EN PRODUCCIÓN 
+ * 
+error_reporting(0);
+ini_set('display_errors', '0');
+ */
 ?>
 <!DOCTYPE html>
 <html lang="es">
