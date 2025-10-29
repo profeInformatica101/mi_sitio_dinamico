@@ -29,6 +29,8 @@ ini_set('display_errors','1');
     <!-- Contenido principal -->
     <main class="mt-4">
       <?php
+  /** Selección de página con pármetro ?p */
+
       switch ($p) {
         case 'contenido':
           $cnt = __DIR__ . '/elementos/contenido.php';

@@ -5,7 +5,7 @@
 $menu = [
   'inicio' => 'Inicio',
   'contenido' => 'Productos',
-  'contacto' => 'Contacto'
+  'contacto' => 'Contacto',
 ];
 
 ?>
