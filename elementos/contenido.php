@@ -3,7 +3,8 @@
 $productos = [
   "Pan de Camas"        => 1.20,
   "Aceitunas aliñadas"  => 2.50,
-  "Tortas de aceite"    => 3.00
+  "Tortas de aceite"    => 3.00,
+  "Mermelada de naranja" => 2.00
 ];
 ?>
 
@@ -17,11 +18,11 @@ $productos = [
     </tr>
   </thead>
   <tbody>
-    <?php foreach ($productos as $nombre => $precio): ?>
+    <?php for ($i = 0; $i < count($productos); $i++): ?>
       <tr>
-        <td><?= htmlspecialchars($nombre) ?></td>
-        <td><?= number_format($precio, 2, ',', '.') ?></td>
+        <td><?= htmlspecialchas(array_keys($productos)[$i]) ?></td>
+        <td><?= number_format(array_values($productos)[$i], 2, ',', '.') ?></td>
       </tr>
-    <?php endforeach; ?>
+    <?php endfor; ?>
   </tbody>
 </table>
