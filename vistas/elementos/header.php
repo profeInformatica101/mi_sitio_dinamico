@@ -7,6 +7,7 @@ $menu = [
   'contenido' => 'Productos',
   'contacto' => 'Contacto',
   'server' => 'Server',
+  'session' => 'Sesiones',
   'xss' => 'XSS'
 
 ];

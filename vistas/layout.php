@@ -23,6 +23,7 @@ ini_set('display_errors', '1');
         case 'contacto': $cnt = __DIR__ . '/elementos/contacto.php'; break;
         case 'contenido':   $cnt = __DIR__ . '/elementos/contenido.php';   break;
         case 'server':   $cnt = __DIR__ . '/elementos/server.php';   break;
+        case 'session':   $cnt = __DIR__ . '/elementos/session.php';   break;
         case 'xss':      $cnt = __DIR__ . '/elementos/xss.php';      break;
         default:         $cnt = __DIR__ . '/elementos/inicio.php';   break;
       }

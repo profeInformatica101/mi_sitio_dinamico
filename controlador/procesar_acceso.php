@@ -2,7 +2,6 @@
 /**
  * ========================================================
  * 🧠 CONTROLADOR: procesar_acceso.php
- * Proyecto: tienda_php
  * Autor: profeinformatica101
  * ========================================================
  * - Procesa login/logout usando base de datos MySQL (PDO)
@@ -20,25 +19,6 @@ ini_set('display_errors', '1');
 ini_set('display_startup_errors', '1');
 
 
-/**
- * --------------------------------------------------------
- *  CONFIGURACIÓN DE CONEXIÓN
- * --------------------------------------------------------
- */
-function getPDO(): PDO {
-    $host = 'localhost';
-    $db   = 'tienda_php';
-    $user = 'root';
-    $pass = ''; // 🔧 Ajusta según tu entorno
-
-    $dsn = "mysql:host=$host;dbname=$db;charset=utf8mb4";
-    $options = [
-        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-    ];
-
-    return new PDO($dsn, $user, $pass, $options);
-}
 
 /**
  * --------------------------------------------------------
@@ -61,30 +41,60 @@ function login(): void {
     $user = trim((string)($_POST['usuario'] ?? ''));
     $pass = trim((string)($_POST['credencial'] ?? ''));
 
+  // En procesar_acceso.php
+$fail = function (string $msg) use ($user): void {
+    $_SESSION['error'] = $msg;
+    $_SESSION['old']   = ['usuario' => $user];
+    header('Location: ' . INDEX);  
+    exit;
+};
+
     if ($user === '' || $pass === '') {
-        Utils::dd('⛔ POST incompleto', $_POST);
+        $fail('Introduce usuario y contraseña.');
     }
 
-    $stmt = $pdo->prepare("SELECT id, usuario, nombre, rol, password FROM usuarios WHERE usuario = :usuario LIMIT 1");
-    $stmt->execute([':usuario' => $user]);
-    $u = $stmt->fetch();
+    try {
+        $stmt = $pdo->prepare("
+            SELECT id, usuario, nombre, rol, password
+              FROM usuarios
+             WHERE usuario = :usuario
+             LIMIT 1
+        ");
+        $stmt->execute([':usuario' => $user]);
+        $u = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    if (!$u) {
-        Utils::dd('🔎 Usuario no encontrado', $user);
+        if (!$u) {
+            $fail('El usuario no existe.');
+        }
+
+    } catch (PDOException $e) {
+        error_log('DB error (login): ' . $e->getMessage());
+        $fail('Ha ocurrido un problema al conectar con la base de datos.');
     }
 
-    if (!password_verify($pass, $u['password'])) {
-        Utils::dd('❌ Contraseña incorrecta', [
-          'input' => $pass,
-          'len'   => strlen($pass),
-          'hex'   => bin2hex($pass),
-          'hash'  => $u['password']
-        ]);
+    // Contraseña incorrecta
+    if (!password_verify($pass, $u['password'] ?? '')) {
+        $fail('Contraseña incorrecta.');
     }
 
+    // (Opcional) rehash si cambió el coste
+    if (password_needs_rehash($u['password'], PASSWORD_DEFAULT)) {
+        $new = password_hash($pass, PASSWORD_DEFAULT);
+        $upd = $pdo->prepare("UPDATE usuarios SET password = :h WHERE id = :id");
+        $upd->execute([':h' => $new, ':id' => (int)$u['id']]);
+    }
+
+    // Sesión segura
     session_regenerate_id(true);
-    $_SESSION['auth'] = ['usuario'=>$u['usuario'], 'nombre'=>$u['nombre'], 'rol'=>$u['rol']];
-    header("Location: " . INDEX);
+    $_SESSION['auth'] = [
+        'id'      => (int)$u['id'],
+        'usuario' => $u['usuario'],
+        'nombre'  => $u['nombre'],
+        'rol'     => $u['rol'],
+        'iat'     => time(),
+    ];
+
+    header('Location: ' . INDEX);
     exit;
 }
 /**

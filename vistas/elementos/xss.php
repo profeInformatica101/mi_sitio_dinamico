@@ -1,29 +1,44 @@
 <?php
 /**
- * vistas/elementos/xss.php
- * ------------------------------------------------
+ * ========================================================
+ * 🧠 vistas/elementos/xss.php
+ * --------------------------------------------------------
  * Demostración XSS — 2 formularios (Seguro/Inseguro)
  * - Form A: usa htmlspecialchars (seguro)
  * - Form B: sin escapar (inseguro) → SOLO con ?p=xss&unsafe=1
- * - Ejemplos listos para copiar (un botón "Copiar" por ejemplo)
+ * - Ejemplos listos para copiar
  * - Panel de parámetros GET / POST (escapado)
  *
- * ⚠️ EJEMPLO DOCENTE — BORRAR DESPUÉS DE LA PRÁCTICA
+ * ⚠️ EJEMPLO DOCENTE — ELIMINAR DESPUÉS DE LA PRÁCTICA
+ * ========================================================
  */
 
-/* Helper para escapar */
-function e(string $t): string {
+/* --------------------------------------------------------
+ * Helper para escapar contenido HTML
+ * -------------------------------------------------------- */
+function escaparHTML(string $t): string {
     return htmlspecialchars($t, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
 }
 
-/* Estado inseguro desde la query */
+/* --------------------------------------------------------
+ * Ejemplo base
+ * -------------------------------------------------------- */
+$nombre = "<script>alert('Hola');</script>";
+echo "<p>Nombre del usuario (seguro): " . escaparHTML($nombre) . "</p>";
+echo "<p>Nombre del usuario (inseguro): " . $nombre . "</p>";
+
+/* --------------------------------------------------------
+ * Estado inseguro desde la query
+ * -------------------------------------------------------- */
 $p = $_GET['p'] ?? 'xss';
 $unsafeEnabled = (isset($_GET['unsafe']) && $_GET['unsafe'] === '1');
 
-/* Action que conserva ?p=xss (&unsafe=1 si procede) */
+/* Acción del formulario conservando los parámetros */
 $action = '?p=' . urlencode((string)$p) . ($unsafeEnabled ? '&unsafe=1' : '');
 
-/* Lectura POST */
+/* --------------------------------------------------------
+ * Lectura de formularios
+ * -------------------------------------------------------- */
 $form          = $_POST['form'] ?? '';
 $textoSeguro   = '';
 $textoInseguro = '';
@@ -32,11 +47,13 @@ if ($form === 'seguro') {
     $textoSeguro = trim((string)($_POST['texto_seguro'] ?? ''));
 }
 if ($form === 'inseguro' && ($unsafeEnabled || ($_POST['unsafe'] ?? '') === '1')) {
-    // Intencional: sin escapar para evidenciar XSS (solo si insecure mode activo)
+    // Intencional: sin escapar para evidenciar XSS (solo en modo inseguro)
     $textoInseguro = trim((string)($_POST['texto_inseguro'] ?? ''));
 }
 
-/* Ejemplos listos para copiar */
+/* --------------------------------------------------------
+ * Ejemplos de payloads listos para copiar
+ * -------------------------------------------------------- */
 $payloads = [
     'Alert clásico' => "<script>alert('XSS')</script>",
     'Banner visual' => <<<'PAY'
@@ -78,9 +95,11 @@ PAY
 PAY
 ];
 
-/* Panel de parámetros (siempre escapados para que no se ejecute nada) */
-$verGET  = e(json_encode($_GET,  JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE));
-$verPOST = e(json_encode($_POST, JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE));
+/* --------------------------------------------------------
+ * Panel de parámetros escapados
+ * -------------------------------------------------------- */
+$verGET  = escaparHTML(json_encode($_GET,  JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+$verPOST = escaparHTML(json_encode($_POST, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
 ?>
 <!doctype html>
 <html lang="es">
@@ -99,7 +118,7 @@ $verPOST = e(json_encode($_POST, JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE));
 <div class="container py-4">
 
   <div class="alert alert-secondary" role="alert">
-    <strong>⚠️ Página de ejemplo docente.</strong> Úsala en laboratorio y elimínala después.
+    <strong>⚠️ Página de ejemplo docente.</strong> Úsala solo en laboratorio y elimínala después.
   </div>
 
   <header class="mb-3 d-flex align-items-center gap-3">
@@ -129,7 +148,7 @@ $verPOST = e(json_encode($_POST, JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE));
           <pre class="snip"><?= $verPOST ?></pre>
         </div>
       </div>
-      <p class="muted-small mb-0">Se muestran escapados para evitar ejecución de HTML/JS.</p>
+      <p class="muted-small mb-0">Se muestran escapados para evitar ejecución de HTML o JavaScript.</p>
     </div>
   </div>
 
@@ -137,15 +156,15 @@ $verPOST = e(json_encode($_POST, JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE));
     <!-- A: Seguro -->
     <div class="col-lg-6">
       <div class="card shadow-sm">
-        <div class="card-header bg-success text-white">Formulario A — Seguro (usa <code>htmlspecialchars</code>)</div>
+        <div class="card-header bg-success text-white">Formulario A — Seguro (usa htmlspecialchars)</div>
         <div class="card-body">
-          <form method="post" action="<?= e($action) ?>" novalidate>
+          <form method="post" action="<?= escaparHTML($action) ?>" novalidate>
             <input type="hidden" name="form" value="seguro">
             <div class="mb-3">
               <label for="texto_seguro" class="form-label">Texto (se mostrará escapado)</label>
               <input id="texto_seguro" name="texto_seguro" type="text" class="form-control"
                      placeholder="<script>alert('XSS')</script>"
-                     value="<?= e($textoSeguro) ?>">
+                     value="<?= escaparHTML($textoSeguro) ?>">
             </div>
             <button class="btn btn-success" type="submit">Mostrar (seguro)</button>
           </form>
@@ -153,8 +172,8 @@ $verPOST = e(json_encode($_POST, JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE));
           <?php if ($textoSeguro !== ''): ?>
             <hr>
             <p class="mb-1"><strong>Salida segura:</strong></p>
-            <div class="p-2 border rounded bg-white"><?= e($textoSeguro) ?></div>
-            <p class="muted-small mt-2">✅ Convertido a texto con <code>htmlspecialchars()</code>. No se ejecuta HTML/JS.</p>
+            <div class="p-2 border rounded bg-white"><?= escaparHTML($textoSeguro) ?></div>
+            <p class="muted-small mt-2">✅ Convertido a texto con htmlspecialchars(). No se ejecuta HTML ni JS.</p>
           <?php endif; ?>
         </div>
       </div>
@@ -173,13 +192,13 @@ $verPOST = e(json_encode($_POST, JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE));
             <p class="muted-small">Desactivado. Actívalo con <span class="code-pill">?p=xss&unsafe=1</span>.</p>
           <?php endif; ?>
 
-          <form method="post" action="<?= e($action) ?>" novalidate>
+          <form method="post" action="<?= escaparHTML($action) ?>" novalidate>
             <input type="hidden" name="form" value="inseguro">
             <input type="hidden" name="unsafe" value="<?= $unsafeEnabled ? '1' : '0' ?>">
             <div class="mb-3">
               <label for="texto_inseguro" class="form-label">Texto (se mostrará sin escapar)</label>
               <textarea id="texto_inseguro" name="texto_inseguro" class="form-control" rows="5"
-                        placeholder="<script>alert('XSS')</script>" <?= $unsafeEnabled ? '' : 'disabled' ?>><?= e($textoInseguro) ?></textarea>
+                        placeholder="<script>alert('XSS')</script>" <?= $unsafeEnabled ? '' : 'disabled' ?>><?= escaparHTML($textoInseguro) ?></textarea>
             </div>
             <button class="btn btn-outline-danger" type="submit" <?= $unsafeEnabled ? '' : 'disabled' ?>>Mostrar (inseguro)</button>
           </form>
@@ -189,7 +208,7 @@ $verPOST = e(json_encode($_POST, JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE));
             <p class="mb-1"><strong>Salida insegura (puede ejecutar JS):</strong></p>
             <div class="p-3 border rounded bg-white">
               <?php
-                // INTENCIONAL: mostramos sin escapar para evidenciar XSS
+                // INTENCIONAL: sin escapar para demostrar XSS
                 echo $textoInseguro;
               ?>
             </div>
@@ -211,25 +230,26 @@ $verPOST = e(json_encode($_POST, JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE));
           <?php $b64 = base64_encode($code); ?>
           <div class="mb-3">
             <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
-              <strong><?= e($titulo) ?></strong>
+              <strong><?= escaparHTML($titulo) ?></strong>
               <button type="button"
                       class="btn btn-sm btn-outline-primary btn-copiar"
-                      data-b64="<?= e($b64) ?>">
+                      data-b64="<?= escaparHTML($b64) ?>">
                 Copiar
               </button>
             </div>
-            <pre class="snip mt-2"><?= e($code) ?></pre>
+            <pre class="snip mt-2"><?= escaparHTML($code) ?></pre>
           </div>
         <?php endforeach; ?>
       </div>
     </div>
   </section>
 
-  <!-- Nota / documentación -->
   <div class="alert alert-info mt-4" role="alert">
-    <h4 class="alert-heading">💡 ¿Qué hace <code>htmlspecialchars()</code>?</h4>
+    <h4 class="alert-heading">💡 ¿Qué hace htmlspecialchars()?</h4>
     <p>Convierte los caracteres especiales <code>&lt; &gt; " ' &amp;</code> en entidades HTML para que el navegador los muestre como texto y no los ejecute.</p>
-    <p class="mb-0">Manual oficial: <a href="https://www.php.net/manual/es/function.htmlspecialchars.php" target="_blank" rel="noopener noreferrer">https://www.php.net/manual/es/function.htmlspecialchars.php</a></p>
+    <p class="mb-0">Más info: 
+      <a href="https://www.php.net/manual/es/function.htmlspecialchars.php" target="_blank">Manual de PHP</a>
+    </p>
   </div>
 
   <footer class="mt-3 text-muted small">
@@ -238,24 +258,16 @@ $verPOST = e(json_encode($_POST, JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE));
 </div>
 
 <script>
-/**
- * Decodifica Base64 a Unicode (soporta multibyte correctamente)
- * @param {string} str base64
- * @returns {string}
- */
 function b64DecodeUnicode(str) {
-  // atob -> bytes Latin1, transform to percent-encoding, then decodeURIComponent
   try {
     return decodeURIComponent(Array.prototype.map.call(atob(str), function(c) {
       return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
     }).join(''));
   } catch (e) {
-    // fallback: atob raw
     try { return atob(str); } catch (_) { return ''; }
   }
 }
 
-/* Copiar payload (usa data-b64 con base64 del ejemplo) */
 document.addEventListener('click', (e) => {
   const btn = e.target.closest('.btn-copiar');
   if (!btn) return;
@@ -272,6 +284,5 @@ document.addEventListener('click', (e) => {
   }).catch(()=> alert('No se pudo copiar — revisa permisos del portapapeles.'));
 });
 </script>
-
 </body>
 </html>
