@@ -1,10 +1,23 @@
 <?php
 /**
- * Función segura para escapar texto y prevenir ataques XSS
- * 
- * Esta función actúa como un "wrapper" (envoltorio) de htmlspecialchars(),
- * garantizando que todo el texto se convierta correctamente a entidades HTML,
- * utilizando la codificación UTF-8 por defecto.
+ * ------------------------------------------------------------
+ * 🔒 escaparHTML(string $texto)
+ * ------------------------------------------------------------
+ * Escapa caracteres especiales del texto para evitar ataques XSS.
+ *
+ * 💡 Ejemplo:
+ *   echo escaparHTML("<script>alert('xss')</script>");
+ *   → mostrará: &lt;script&gt;alert('xss')&lt;/script&gt;
+ *
+ * 🚀 Parámetros:
+ *   - $texto: cadena original que podría contener HTML o JS.
+ *
+ * 🔐 Seguridad:
+ *   - ENT_QUOTES → convierte comillas simples y dobles.
+ *   - ENT_SUBSTITUTE → sustituye caracteres inválidos en UTF-8.
+ *   - 'UTF-8' → garantiza codificación segura.
+ *
+ * 📘 Usar SIEMPRE al imprimir contenido no controlado por el programador.
  */
 
 function escaparHTML(string $texto): string {

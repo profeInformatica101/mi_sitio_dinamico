@@ -1,0 +1,52 @@
+<?php
+/**
+ * ========================================================
+ * 🧩 Clase Database (Patrón Singleton)
+ * Proyecto: tienda_php
+ * Autor: profeinformatica101
+ * ========================================================
+ */
+
+declare(strict_types=1);
+require_once __DIR__ . '/../config.php';
+
+
+class Database {
+    private static ?PDO $conexion = null;
+
+    private function __construct() {}
+
+    public static function getConnection(): PDO {
+        if (self::$conexion === null) {
+            $host = 'localhost';
+            $db   = 'tienda_php';
+            $user = 'root';
+            $pass = '';
+            $charset = 'utf8mb4';
+
+            $dsn = "mysql:host=$host;dbname=$db;charset=$charset";
+            $options = [
+                PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                PDO::ATTR_EMULATE_PREPARES   => false,
+            ];
+
+            try {
+                self::$conexion = new PDO($dsn, $user, $pass, $options);
+            } catch (PDOException $e) {
+                if (DEBUG) {
+                    die("<pre style='color:red'>❌ Error al conectar con la base de datos:\n" . $e->getMessage() . "</pre>");
+                } else {
+                    die("Error interno del servidor.");
+                }
+            }
+        }
+
+        return self::$conexion;
+    }
+
+    public static function close(): void {
+        self::$conexion = null;
+    }
+}
+?>
