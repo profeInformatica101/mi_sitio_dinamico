@@ -1,61 +1,277 @@
 <?php
 /**
- * ------------------------------------------------------------
- * 🔒 escaparHTML(string $texto)
- * ------------------------------------------------------------
- * Escapa caracteres especiales del texto para evitar ataques XSS.
+ * vistas/elementos/xss.php
+ * ------------------------------------------------
+ * Demostración XSS — 2 formularios (Seguro/Inseguro)
+ * - Form A: usa htmlspecialchars (seguro)
+ * - Form B: sin escapar (inseguro) → SOLO con ?p=xss&unsafe=1
+ * - Ejemplos listos para copiar (un botón "Copiar" por ejemplo)
+ * - Panel de parámetros GET / POST (escapado)
  *
- * 💡 Ejemplo:
- *   echo escaparHTML("<script>alert('xss')</script>");
- *   → mostrará: &lt;script&gt;alert('xss')&lt;/script&gt;
- *
- * 🚀 Parámetros:
- *   - $texto: cadena original que podría contener HTML o JS.
- *
- * 🔐 Seguridad:
- *   - ENT_QUOTES → convierte comillas simples y dobles.
- *   - ENT_SUBSTITUTE → sustituye caracteres inválidos en UTF-8.
- *   - 'UTF-8' → garantiza codificación segura.
- *
- * 📘 Usar SIEMPRE al imprimir contenido no controlado por el programador.
+ * ⚠️ EJEMPLO DOCENTE — BORRAR DESPUÉS DE LA PRÁCTICA
  */
 
-function escaparHTML(string $texto): string {
-    return htmlspecialchars($texto, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+/* Helper para escapar */
+function e(string $t): string {
+    return htmlspecialchars($t, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
 }
 
+/* Estado inseguro desde la query */
+$p = $_GET['p'] ?? 'xss';
+$unsafeEnabled = (isset($_GET['unsafe']) && $_GET['unsafe'] === '1');
+
+/* Action que conserva ?p=xss (&unsafe=1 si procede) */
+$action = '?p=' . urlencode((string)$p) . ($unsafeEnabled ? '&unsafe=1' : '');
+
+/* Lectura POST */
+$form          = $_POST['form'] ?? '';
+$textoSeguro   = '';
+$textoInseguro = '';
+
+if ($form === 'seguro') {
+    $textoSeguro = trim((string)($_POST['texto_seguro'] ?? ''));
+}
+if ($form === 'inseguro' && ($unsafeEnabled || ($_POST['unsafe'] ?? '') === '1')) {
+    // Intencional: sin escapar para evidenciar XSS (solo si insecure mode activo)
+    $textoInseguro = trim((string)($_POST['texto_inseguro'] ?? ''));
+}
+
+/* Ejemplos listos para copiar */
+$payloads = [
+    'Alert clásico' => "<script>alert('XSS')</script>",
+    'Banner visual' => <<<'PAY'
+<script>
+(function(){
+  const banner = document.createElement('div');
+  banner.textContent = '⚠️ DEMO: banner insertado vía XSS (solo laboratorio)';
+  banner.style = 'position:fixed;top:0;left:0;right:0;background:#fff3cd;color:#856404;padding:.6rem;text-align:center;z-index:99999;border-bottom:1px solid #ffe8a1;';
+  document.body.prepend(banner);
+})();
+</script>
+PAY
+,
+    'Modal simple' => <<<'PAY'
+<script>
+(function(){
+  const wrap = document.createElement('div');
+  wrap.innerHTML =
+    '<div style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.5);z-index:99999;">' +
+      '<div style="background:#fff;padding:1rem;border-radius:8px;max-width:90%">' +
+        '<h3>Demo XSS — Modal</h3><p>Solo visual (demo).</p>' +
+        '<div style="text-align:right"><button id="cerrarDemo" style="padding:.35rem .7rem;border:1px solid #ccc;border-radius:6px;background:#f8f9fa">Cerrar</button></div>' +
+      '</div></div>';
+  document.body.append(wrap);
+  wrap.querySelector('#cerrarDemo')?.addEventListener('click', () => wrap.remove());
+})();
+</script>
+PAY
+,
+    'Cambio de fondo' => <<<'PAY'
+<script>
+(function(){
+  const old = document.body.style.backgroundColor;
+  document.body.style.transition = 'background .3s';
+  document.body.style.backgroundColor = '#fee';
+  setTimeout(()=> document.body.style.backgroundColor = old, 2000);
+})();
+</script>
+PAY
+];
+
+/* Panel de parámetros (siempre escapados para que no se ejecute nada) */
+$verGET  = e(json_encode($_GET,  JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE));
+$verPOST = e(json_encode($_POST, JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE));
+?>
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <title>Demo XSS — Seguro vs. Inseguro</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    pre.snip{white-space:pre-wrap;word-break:break-word;background:#f8f9fa;padding:.8rem;border-radius:6px;border:1px solid #e9ecef}
+    .muted-small{font-size:.85rem;color:#6c757d}
+    .code-pill{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+  </style>
+</head>
+<body class="bg-light">
+<div class="container py-4">
+
+  <div class="alert alert-secondary" role="alert">
+    <strong>⚠️ Página de ejemplo docente.</strong> Úsala en laboratorio y elimínala después.
+  </div>
+
+  <header class="mb-3 d-flex align-items-center gap-3">
+    <h1 class="h4 mb-0">Demostración XSS — 2 formularios</h1>
+    <small class="text-muted">
+      Form B (inseguro):
+      <?php if ($unsafeEnabled): ?>
+        <span class="badge bg-danger">Activo</span>
+        <a href="?p=xss" class="ms-1">Desactivar</a>
+      <?php else: ?>
+        <a href="?p=xss&unsafe=1" class="btn btn-sm btn-outline-danger ms-1">Activar (solo laboratorio)</a>
+      <?php endif; ?>
+    </small>
+  </header>
+
+  <!-- Panel de parámetros de entrada -->
+  <div class="card mb-4">
+    <div class="card-header bg-light"><strong>Parámetros de entrada recibidos</strong></div>
+    <div class="card-body">
+      <div class="row g-3">
+        <div class="col-md-6">
+          <h6>GET</h6>
+          <pre class="snip"><?= $verGET ?></pre>
+        </div>
+        <div class="col-md-6">
+          <h6>POST</h6>
+          <pre class="snip"><?= $verPOST ?></pre>
+        </div>
+      </div>
+      <p class="muted-small mb-0">Se muestran escapados para evitar ejecución de HTML/JS.</p>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <!-- A: Seguro -->
+    <div class="col-lg-6">
+      <div class="card shadow-sm">
+        <div class="card-header bg-success text-white">Formulario A — Seguro (usa <code>htmlspecialchars</code>)</div>
+        <div class="card-body">
+          <form method="post" action="<?= e($action) ?>" novalidate>
+            <input type="hidden" name="form" value="seguro">
+            <div class="mb-3">
+              <label for="texto_seguro" class="form-label">Texto (se mostrará escapado)</label>
+              <input id="texto_seguro" name="texto_seguro" type="text" class="form-control"
+                     placeholder="<script>alert('XSS')</script>"
+                     value="<?= e($textoSeguro) ?>">
+            </div>
+            <button class="btn btn-success" type="submit">Mostrar (seguro)</button>
+          </form>
+
+          <?php if ($textoSeguro !== ''): ?>
+            <hr>
+            <p class="mb-1"><strong>Salida segura:</strong></p>
+            <div class="p-2 border rounded bg-white"><?= e($textoSeguro) ?></div>
+            <p class="muted-small mt-2">✅ Convertido a texto con <code>htmlspecialchars()</code>. No se ejecuta HTML/JS.</p>
+          <?php endif; ?>
+        </div>
+      </div>
+    </div>
+
+    <!-- B: Inseguro -->
+    <div class="col-lg-6">
+      <div class="card shadow-sm">
+        <div class="card-header bg-danger text-white">Formulario B — Inseguro (sin escapar)</div>
+        <div class="card-body">
+          <div class="alert alert-warning">
+            <strong>Advertencia:</strong> este formulario puede ejecutar código. Úsalo solo en entornos controlados.
+          </div>
+
+          <?php if (!$unsafeEnabled): ?>
+            <p class="muted-small">Desactivado. Actívalo con <span class="code-pill">?p=xss&unsafe=1</span>.</p>
+          <?php endif; ?>
+
+          <form method="post" action="<?= e($action) ?>" novalidate>
+            <input type="hidden" name="form" value="inseguro">
+            <input type="hidden" name="unsafe" value="<?= $unsafeEnabled ? '1' : '0' ?>">
+            <div class="mb-3">
+              <label for="texto_inseguro" class="form-label">Texto (se mostrará sin escapar)</label>
+              <textarea id="texto_inseguro" name="texto_inseguro" class="form-control" rows="5"
+                        placeholder="<script>alert('XSS')</script>" <?= $unsafeEnabled ? '' : 'disabled' ?>><?= e($textoInseguro) ?></textarea>
+            </div>
+            <button class="btn btn-outline-danger" type="submit" <?= $unsafeEnabled ? '' : 'disabled' ?>>Mostrar (inseguro)</button>
+          </form>
+
+          <?php if ($textoInseguro !== '' && $unsafeEnabled): ?>
+            <hr>
+            <p class="mb-1"><strong>Salida insegura (puede ejecutar JS):</strong></p>
+            <div class="p-3 border rounded bg-white">
+              <?php
+                // INTENCIONAL: mostramos sin escapar para evidenciar XSS
+                echo $textoInseguro;
+              ?>
+            </div>
+            <p class="muted-small mt-2">⚠️ Si incluyes <code>&lt;script&gt;</code>, el navegador lo ejecutará.</p>
+          <?php endif; ?>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Ejemplos listos para copiar -->
+  <section class="mt-4">
+    <div class="card shadow-sm">
+      <div class="card-header bg-secondary text-white">Ejemplos listos para copiar y pegar</div>
+      <div class="card-body">
+        <p class="muted-small">Usa el botón <strong>Copiar</strong> y pega el contenido en el formulario que quieras.</p>
+
+        <?php foreach ($payloads as $titulo => $code): ?>
+          <?php $b64 = base64_encode($code); ?>
+          <div class="mb-3">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+              <strong><?= e($titulo) ?></strong>
+              <button type="button"
+                      class="btn btn-sm btn-outline-primary btn-copiar"
+                      data-b64="<?= e($b64) ?>">
+                Copiar
+              </button>
+            </div>
+            <pre class="snip mt-2"><?= e($code) ?></pre>
+          </div>
+        <?php endforeach; ?>
+      </div>
+    </div>
+  </section>
+
+  <!-- Nota / documentación -->
+  <div class="alert alert-info mt-4" role="alert">
+    <h4 class="alert-heading">💡 ¿Qué hace <code>htmlspecialchars()</code>?</h4>
+    <p>Convierte los caracteres especiales <code>&lt; &gt; " ' &amp;</code> en entidades HTML para que el navegador los muestre como texto y no los ejecute.</p>
+    <p class="mb-0">Manual oficial: <a href="https://www.php.net/manual/es/function.htmlspecialchars.php" target="_blank" rel="noopener noreferrer">https://www.php.net/manual/es/function.htmlspecialchars.php</a></p>
+  </div>
+
+  <footer class="mt-3 text-muted small">
+    Ejemplo docente — eliminar después de la práctica.
+  </footer>
+</div>
+
+<script>
 /**
- * 🧠 Explicación:
- * 
- * La función escaparHTML() sirve para proteger tu aplicación web de ataques
- * de tipo XSS (Cross-Site Scripting), un tipo de vulnerabilidad muy común
- * en sitios que muestran datos introducidos por los usuarios sin sanitizarlos.
- * 
- * 📌 ¿Qué hace htmlspecialchars()?
- * Convierte caracteres especiales como:
- *   - <  → &lt;
- *   - >  → &gt;
- *   - "  → &quot;
- *   - '  → &#039;
- *   - &  → &amp;
- * 
- * De esta forma, si un usuario intenta inyectar código HTML o JavaScript
- * (por ejemplo: <script>alert('Hacked!')</script>),
- * el navegador mostrará el texto literalmente en lugar de ejecutarlo.
- * 
- * 🧾 Uso recomendado:
- *   echo escaparHTML($dato_usuario);
- * 
- * ⚙️ Parámetros usados:
- *   - ENT_QUOTES: convierte tanto comillas simples como dobles.
- *   - ENT_SUBSTITUTE: reemplaza caracteres inválidos en UTF-8.
- *   - 'UTF-8': asegura compatibilidad con caracteres internacionales.
+ * Decodifica Base64 a Unicode (soporta multibyte correctamente)
+ * @param {string} str base64
+ * @returns {string}
  */
-?>
+function b64DecodeUnicode(str) {
+  // atob -> bytes Latin1, transform to percent-encoding, then decodeURIComponent
+  try {
+    return decodeURIComponent(Array.prototype.map.call(atob(str), function(c) {
+      return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+    }).join(''));
+  } catch (e) {
+    // fallback: atob raw
+    try { return atob(str); } catch (_) { return ''; }
+  }
+}
 
-<?php
-$nombre = "<script>alert('Hola');</script>";
-echo "<p>Nombre del usuario: " . escaparHTML($nombre) . "</p>";
-echo "<p>Nombre del usuario: " . $nombre . "</p>";
+/* Copiar payload (usa data-b64 con base64 del ejemplo) */
+document.addEventListener('click', (e) => {
+  const btn = e.target.closest('.btn-copiar');
+  if (!btn) return;
+  const b64 = btn.getAttribute('data-b64') || '';
+  const text = b64DecodeUnicode(b64);
+  if (!text) {
+    alert('No se pudo decodificar el ejemplo.');
+    return;
+  }
+  navigator.clipboard.writeText(text).then(() => {
+    const old = btn.textContent;
+    btn.textContent = 'Copiado ✓';
+    setTimeout(()=> btn.textContent = old, 1000);
+  }).catch(()=> alert('No se pudo copiar — revisa permisos del portapapeles.'));
+});
+</script>
 
-?>
+</body>
+</html>
