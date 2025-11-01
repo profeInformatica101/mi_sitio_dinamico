@@ -38,6 +38,9 @@ ini_set('display_errors','1');
          case 'contacto':
           $cnt = __DIR__ . '/elementos/contacto.php';
           break;
+           case 'server':
+          $cnt = __DIR__ . '/elementos/server.php';
+          break;
         
         default:
           $cnt = __DIR__ . '/elementos/inicio.php';
