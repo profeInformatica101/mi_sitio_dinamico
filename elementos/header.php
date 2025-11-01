@@ -6,7 +6,9 @@ $menu = [
   'inicio' => 'Inicio',
   'contenido' => 'Productos',
   'contacto' => 'Contacto',
-  'server' => 'Server'
+  'server' => 'Server',
+  'xss' => 'XSS'
+
 ];
 
 ?>

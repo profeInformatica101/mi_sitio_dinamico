@@ -41,6 +41,9 @@ ini_set('display_errors','1');
            case 'server':
           $cnt = __DIR__ . '/elementos/server.php';
           break;
+           case 'xss':
+          $cnt = __DIR__ . '/elementos/xss.php';
+          break;
         
         default:
           $cnt = __DIR__ . '/elementos/inicio.php';

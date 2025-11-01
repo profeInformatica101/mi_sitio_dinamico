@@ -3,6 +3,52 @@
 * Funciones de plantilla simples
 */
 
+/**
+ * Genera un menú de lectura tipo "patrón formulario" para navegar entre entidades
+ *
+ * @param string $entidad Nombre genérico de la entidad (ej: 'personaje', 'usuario')
+ * @param array $elemento Datos del elemento actual (clave => valor)
+ * @param int $indice Índice actual del elemento
+ * @param int $total Número total de elementos
+ * @param string $accionURL Ruta del script que procesa las peticiones (por ejemplo, $_SERVER['PHP_SELF'])
+ * @return string HTML del menú completo
+ */
+function generarMenuLectura(string $entidad, array $elemento, int $indice, int $total, string $accionURL): string {
+    $entidadMayus = ucfirst($entidad);
+    $contenido = "<h2>Lectura de {$entidadMayus}</h2>\n";
+
+    // Mostrar los datos de la entidad (clave: valor)
+    $contenido .= "<div style='border:1px solid #ccc; border-radius:8px; padding:1rem; background:#fafafa;'>\n";
+    foreach ($elemento as $clave => $valor) {
+        $claveLimpia = htmlspecialchars($clave, ENT_QUOTES, 'UTF-8');
+        $valorLimpio = htmlspecialchars((string)$valor, ENT_QUOTES, 'UTF-8');
+        $contenido .= "<p><strong>{$claveLimpia}:</strong> {$valorLimpio}</p>\n";
+    }
+    $contenido .= "</div>\n";
+
+    // Navegación por formulario
+    $contenido .= "<form method='GET' action='" . htmlspecialchars($accionURL, ENT_QUOTES, 'UTF-8') . "' style='text-align:center; margin-top:1rem;'>\n";
+    $contenido .= "<input type='hidden' name='indice' value='{$indice}'>\n";
+
+    // Botones Anterior / Siguiente
+    if ($indice > 0) {
+        $contenido .= "<button name='indice' value='" . ($indice - 1) . "'>&lt; Anterior</button>\n";
+    } else {
+        $contenido .= "<button disabled>&lt; Anterior</button>\n";
+    }
+
+    if ($indice < $total - 1) {
+        $contenido .= "<button name='indice' value='" . ($indice + 1) . "'>Siguiente &gt;</button>\n";
+    } else {
+        $contenido .= "<button disabled>Siguiente &gt;</button>\n";
+    }
+
+    // Info de posición
+    $contenido .= "<p style='margin-top:.5rem;'>Elemento " . ($indice + 1) . " de {$total}</p>\n";
+    $contenido .= "</form>\n";
+
+    return $contenido;
+}
 
 function generarPaginaHTML(string $titulo, string $contenido): string {
   $res = "<!DOCTYPE html>\n"
