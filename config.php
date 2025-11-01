@@ -1,5 +1,6 @@
 <?php
-$titulo = "Mi primer sitio modular con PHP";
+define('NOMBRE_SITIO', 'Web dinámica PHP');
+//$titulo = "Mi primer sitio modular con PHP";
 $contenido = "elementos/contenido.php";
 
 // URL base del proyecto (ajústala si cambias de entorno)
