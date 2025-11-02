@@ -52,11 +52,10 @@ final class Utiles
     /**
      * 🔁 Redirección segura
      */
-    public static function redirect(string $to): void
-    {
-        header("Location: {$to}");
-        exit;
-    }
+   public static function redirect(string $to = INDEX): void {
+    header("Location: {$to}");
+    exit;
+}
 
     /**
      * 📮 Atajos de request

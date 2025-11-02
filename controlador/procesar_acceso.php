@@ -12,23 +12,12 @@
 session_start();
 require_once __DIR__ . '/../config.php';
 require_once __DIR__ . '/../nucleo/Database.php';
-
+require_once __DIR__ . '/../nucleo/Utiles.php';
 // Mostrar errores (solo entorno de desarrollo)
-error_reporting(E_ALL);
+/*error_reporting(E_ALL);
 ini_set('display_errors', '1');
 ini_set('display_startup_errors', '1');
-
-
-
-/**
- * --------------------------------------------------------
- *  HELPERS
- * --------------------------------------------------------
- */
-function redirect(string $to = INDEX): void {
-    header("Location: {$to}");
-    exit;
-}
+*/
 
 
 /**
@@ -41,13 +30,15 @@ function login(): void {
     $user = trim((string)($_POST['usuario'] ?? ''));
     $pass = trim((string)($_POST['credencial'] ?? ''));
 
-  // En procesar_acceso.php
-$fail = function (string $msg) use ($user): void {
-    $_SESSION['error'] = $msg;
-    $_SESSION['old']   = ['usuario' => $user];
-    header('Location: ' . INDEX);  
-    exit;
-};
+    // En procesar_acceso.php
+    $fail = function (string $msg) use ($user): void {
+        $_SESSION['error'] = $msg;
+        $_SESSION['old']   = ['usuario' => $user];
+
+        //Redirect INDEX.X
+        header('Location: ' . INDEX);  
+        exit;
+    };
 
     if ($user === '' || $pass === '') {
         $fail('Introduce usuario y contraseña.');
@@ -103,8 +94,14 @@ $fail = function (string $msg) use ($user): void {
  * --------------------------------------------------------
  */
 function logout(): void {
-    session_destroy();
-    redirect();
+    $_SESSION = []; // Limpia los datos en memoria
+    $params = session_get_cookie_params(); // Recupera info de la cookie
+    setcookie(session_name(), '', time() - 3600, 
+        $params['path'], $params['domain'],
+        $params['secure'], $params['httponly']); // Borra cookie del navegador
+    session_destroy(); // Borra archivo de sesión en servidor
+    Utiles::redirect(INDEX); // Redirige
+
 }
 
 /**
@@ -113,7 +110,7 @@ function logout(): void {
  * --------------------------------------------------------
  */
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    redirect();
+    Utiles::redirect(INDEX);
 }
 
 $accion = $_POST['accion'] ?? '';
@@ -128,7 +125,7 @@ switch ($accion) {
         break;
 
     default:
-        redirect();
+       Utiles::redirect(INDEX);
 }
 
 

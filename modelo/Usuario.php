@@ -1,47 +1,70 @@
 <?php
+//activar el modo estricto de tipos
+declare(strict_types=1);
+
 require_once __DIR__ . '/Entidad.php';
 
-class Usuario extends Entidad {
-    private PDO $pdo;
-    public string $usuario;
-    public string $nombre;
-    public string $rol;
-    private string $password;
+/**
+ * ========================================================
+ * 👤 Clase Usuario
+ * Representa una fila de la tabla 'usuarios'
+ * Hereda de Entidad (que contiene el id y utilidades comunes)
+ * ========================================================
+ */
+class Usuario extends Entidad
+{
+    public string $usuario = '';
+    public string $nombre  = '';
+    public string $rol     = 'usuario';  // Valores típicos: 'usuario', 'admin'
+    private string $passwordHash = '';
 
-    public function __construct(PDO $pdo) {
-        $this->pdo = $pdo;
-    }
-
-    public function guardar(): bool {
-        if ($this->tieneId()) {
-            $sql = "UPDATE usuarios SET usuario=?, nombre=?, rol=?, password=? WHERE id=?";
-            $stmt = $this->pdo->prepare($sql);
-            return $stmt->execute([$this->usuario, $this->nombre, $this->rol, $this->password, $this->id]);
-        } else {
-            $sql = "INSERT INTO usuarios (usuario, nombre, rol, password) VALUES (?, ?, ?, ?)";
-            $stmt = $this->pdo->prepare($sql);
-            $ok = $stmt->execute([$this->usuario, $this->nombre, $this->rol, $this->password]);
-            if ($ok) {
-                $this->id = (int)$this->pdo->lastInsertId();
-            }
-            return $ok;
+    /**
+     * Asigna la contraseña en texto plano.
+     * Se encarga de generar su hash seguro con password_hash().
+     */
+    public function setPassword(string $plainPassword): void
+    {
+        if (trim($plainPassword) !== '') {
+            $this->passwordHash = password_hash($plainPassword, PASSWORD_DEFAULT);
         }
     }
 
-    public static function buscarPorUsuario(PDO $pdo, string $usuario): ?self {
-        $stmt = $pdo->prepare("SELECT * FROM usuarios WHERE usuario = ?");
-        $stmt->execute([$usuario]);
-        $datos = $stmt->fetch();
-        if ($datos) {
-            $u = new self($pdo);
-            $u->setId((int)$datos['id']);
-            $u->usuario = $datos['usuario'];
-            $u->nombre = $datos['nombre'];
-            $u->rol = $datos['rol'];
-            $u->password = $datos['password'];
-            return $u;
-        }
-        return null;
+    /**
+     * Establece directamente el hash desde la base de datos.
+     * (Evita volver a hashear contraseñas ya cifradas.)
+     */
+    public function setPasswordHash(string $hash): void
+    {
+        $this->passwordHash = $hash;
+    }
+
+    /**
+     * Devuelve el hash de la contraseña (no la contraseña en texto plano).
+     */
+    public function getPasswordHash(): string
+    {
+        return $this->passwordHash;
+    }
+
+    /**
+     * Verifica si una contraseña en texto plano coincide con el hash almacenado.
+     */
+    public function verificarPassword(string $plainPassword): bool
+    {
+        return password_verify($plainPassword, $this->passwordHash);
+    }
+
+    /**
+     * Convierte el objeto en un array (útil para debug o JSON).
+     */
+    public function toArray(): array
+    {
+        return [
+            'id'      => $this->getId(),
+            'usuario' => $this->usuario,
+            'nombre'  => $this->nombre,
+            'rol'     => $this->rol,
+            // Nunca se incluye el hash en respuestas visibles
+        ];
     }
 }
-?>

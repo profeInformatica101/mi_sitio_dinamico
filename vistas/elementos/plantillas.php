@@ -127,3 +127,55 @@ function generarLogout(string $actionURL, ?string $csrf = null): string {
 
     return $html;
 }
+// ========================================================
+// Función: mostrarListadoUsuarios()
+// Muestra una tabla con los usuarios si el usuario logueado es admin.
+// ========================================================
+function mostrarListadoUsuarios(): string {
+    require_once __DIR__ . '/../../nucleo/Database.php';
+    require_once __DIR__ . '/../../modelo/dao/UsuarioDAO.php';
+
+    $pdo = Database::getConnection();
+    $dao = new UsuarioDAO($pdo);
+    $usuarios = $dao->listar(); // ← devuelve Usuario[]
+
+    $h = '<hr><h2 class="mt-4">👑 Administración de Usuarios</h2>';
+
+    if (!$usuarios) {
+        return $h . '<div class="alert alert-info mt-3">No hay usuarios registrados.</div>';
+    }
+
+    $h .= '<div class="table-responsive mt-3">
+            <table class="table table-bordered table-hover align-middle">
+              <thead class="table-dark text-center">
+                <tr><th>ID</th><th>Usuario</th><th>Nombre</th><th>Rol</th><th>Acciones</th></tr>
+              </thead><tbody>';
+
+    foreach ($usuarios as $u) {
+        /** @var Usuario $u */
+        $id      = (int)$u->getId();
+        $usuario = htmlspecialchars($u->usuario, ENT_QUOTES, 'UTF-8');
+        $nombre  = htmlspecialchars($u->nombre,  ENT_QUOTES, 'UTF-8');
+        $rol     = htmlspecialchars($u->rol,     ENT_QUOTES, 'UTF-8');
+
+        $h .= "<tr>
+                 <td>{$id}</td>
+                 <td>{$usuario}</td>
+                 <td>{$nombre}</td>
+                 <td><span class='badge bg-secondary'>{$rol}</span></td>
+                 <td class='text-center'>
+                   <a href='?p=usuarios&accion=editar&id={$id}' class='btn btn-sm btn-outline-primary me-1'>Editar</a>
+                   <form method='post' action='?p=usuarios' class='d-inline' onsubmit='return confirm(\"¿Eliminar este usuario?\");'>
+                     <input type='hidden' name='accion' value='eliminar'>
+                     <input type='hidden' name='id' value='{$id}'>
+                     <button type='submit' class='btn btn-sm btn-outline-danger'>Eliminar</button>
+                   </form>
+                 </td>
+               </tr>";
+    }
+
+    $h .= '</tbody></table></div>
+           <div class="mt-3"><a href=\"?p=usuarios&accion=crear\" class=\"btn btn-primary\">➕ Nuevo usuario</a></div>';
+
+    return $h;
+}

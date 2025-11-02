@@ -23,3 +23,9 @@ CREATE TABLE usuarios (
     rol ENUM('admin','manager','usuario') DEFAULT 'usuario',
     creado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE productos (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  nombre VARCHAR(50) NOT NULL,
+  precio DOUBLE NOT NULL
+)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
