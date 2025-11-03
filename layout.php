@@ -2,6 +2,7 @@
 // Debug temporal
 error_reporting(E_ALL);
 ini_set('display_errors','1');
+//echo $p;
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -28,7 +29,19 @@ ini_set('display_errors','1');
     <!-- Contenido principal -->
     <main class="mt-4">
       <?php
-        $cnt = __DIR__ . '/elementos/contenido.php';
+      switch ($p) {
+        case 'contenido':
+          $cnt = __DIR__ . '/elementos/contenido.php';
+          break;
+         case 'contacto':
+          $cnt = __DIR__ . '/elementos/contacto.php';
+          break;
+        
+        default:
+          $cnt = __DIR__ . '/elementos/inicio.php';
+          break;
+      }
+       
         if (is_file($cnt) && is_readable($cnt)) {
           require_once $cnt;
         } else {
