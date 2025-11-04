@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 require_once __DIR__ . '/DAO.php';
@@ -146,5 +147,12 @@ class UsuarioDAO extends DAO
         $u->setPasswordHash($row['password']); // ← importante
 
         return $u;
+    }
+
+    protected function crearEntidad(array $fila): object
+    {
+        $usuario = new Usuario($fila['nombre'], $fila['email']);
+        $usuario->setId((int)$fila['id']);
+        return $usuario;
     }
 }

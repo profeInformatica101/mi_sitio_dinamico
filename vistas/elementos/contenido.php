@@ -1,10 +1,20 @@
 <?php
+
+  require_once __DIR__ . '/../../nucleo/Database.php';
+  require_once __DIR__ . '/../../modelo/dao/ProductoDAO.php';
+
+    $pdo = Database::getConnection();
+    $dao = new ProductoDAO($pdo);
+    $productos = $dao->listar(); 
+
+  //  var_dump($productos);
+/*
 // Estructura asociativa: producto => precio
 $productos = [
   "Pan de Camas"        => 1.20,
   "Aceitunas aliñadas"  => 2.50,
   "Tortas de aceite"    => 3.00
-];
+];*/
 ?>
 
 <h2 class="text-success text-center mt-4">Productos locales de Camas</h2>
@@ -17,10 +27,10 @@ $productos = [
     </tr>
   </thead>
   <tbody>
-    <?php foreach ($productos as $nombre => $precio): ?>
+    <?php foreach ($productos as $p): ?>
       <tr>
-        <td><?= htmlspecialchars($nombre) ?></td>
-        <td><?= number_format($precio, 2, ',', '.') ?></td>
+        <td><?= htmlspecialchars( $p->nombre) ?></td>
+      <td><?= $p->precio ?></td>
       </tr>
     <?php endforeach; ?>
   </tbody>
