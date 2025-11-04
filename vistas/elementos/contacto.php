@@ -12,7 +12,7 @@ require_once __DIR__ . '/../../nucleo/Datos.php';
 
 // Ejecutar silenciosamente el seeding
 ob_start();
-$filasUsuarios = seedUsuariosDatos();   // o Utiles::seedUsuarios();
+$filasUsuarios = seedUsuariosDatos(true);   // o Utiles::seedUsuarios();
 ob_end_clean();
 
 // Mostrar resultado simple (en texto o HTML)

@@ -98,6 +98,7 @@ function seedUsuariosDatos(bool $reset = false): int
         ['user2',    'user2',    'Pedro Cliente',         'usuario'],
         ['user3',    'user3',    'Lucía Compradora',      'usuario'],
         ['user4',    'user4',    'Manuel Perez',          'usuario'],
+         ['user5',    'user5',    'Tess test',          'usuario'],
     ];
 
     if ($reset) {

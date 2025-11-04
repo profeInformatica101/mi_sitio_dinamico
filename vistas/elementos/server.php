@@ -1,3 +1,70 @@
+<?php
+/**
+ * Devuelve la IP del visitante.
+ * - Intenta primero obtener una IP pública desde cabeceras como X-Forwarded-For.
+ * - Si no encuentra una pública, devuelve la primera IP válida disponible.
+ * - Si no hay ninguna, devuelve null.
+ *
+ * Nota: las cabeceras tipo X-Forwarded-For pueden ser falsificadas. Si estás detrás de
+ * un reverse proxy (nginx, Cloudflare, etc.) configura el proxy para pasar la IP real
+ * y marca en tu app qué proxies son de confianza.
+ */
+function getUserIp(array $server = null): ?string {
+    $s = $server ?? $_SERVER;
+
+    // Cabeceras que a menudo contienen la IP original
+    $candidates = [
+        'HTTP_X_FORWARDED_FOR', // lista CSV: cliente, proxy1, proxy2...
+        'HTTP_CLIENT_IP',
+        'HTTP_X_REAL_IP',
+        'HTTP_CF_CONNECTING_IP', // Cloudflare
+        'REMOTE_ADDR'
+    ];
+
+    // 1) Intentar obtener una IP *pública* válida (no privada/reservada)
+    foreach ($candidates as $key) {
+        if (empty($s[$key])) continue;
+
+        if ($key === 'HTTP_X_FORWARDED_FOR') {
+            $list = explode(',', $s[$key]);
+            foreach ($list as $ip) {
+                $ip = trim($ip);
+                if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)) {
+                    return $ip;
+                }
+            }
+        } else {
+            $ip = trim($s[$key]);
+            if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)) {
+                return $ip;
+            }
+        }
+    }
+
+    // 2) Si no hay pública, devolver la primera IP válida (incluso privada/local)
+    foreach ($candidates as $key) {
+        if (empty($s[$key])) continue;
+
+        if ($key === 'HTTP_X_FORWARDED_FOR') {
+            $list = explode(',', $s[$key]);
+            foreach ($list as $ip) {
+                $ip = trim($ip);
+                if (filter_var($ip, FILTER_VALIDATE_IP)) {
+                    return $ip;
+                }
+            }
+        } else {
+            $ip = trim($s[$key]);
+            if (filter_var($ip, FILTER_VALIDATE_IP)) {
+                return $ip;
+            }
+        }
+    }
+
+    return null;
+}
+?>
+
 <div class="container my-5">
     <h1><mark>Variable $_SERVER</mark></h1>
     <h2 class="text-center mb-4">Datos del Navegador y del Servidor</h2>
@@ -99,7 +166,16 @@
             </div>
         </div>
     </div>
+<?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
+$auth = $_SESSION['auth'] ?? null;
+
+// Guardar IP en la sesión (opcional)
+$_SESSION['ip'] = getUserIp();
+?>
     <div class="alert alert-info mt-4" role="alert">
         <h4 class="alert-heading">💡 Explicación</h4>
         <p>
