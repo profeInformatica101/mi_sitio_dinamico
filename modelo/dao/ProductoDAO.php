@@ -51,7 +51,7 @@ class ProductoDAO extends DAO
 
     /**
      * Devuelve todos los usuarios (sin exponer el hash).
-     * @return Usuario[]
+     * @return Producto[]
      */
     public function listar(): array
     {
