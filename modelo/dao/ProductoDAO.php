@@ -70,5 +70,13 @@ class ProductoDAO extends DAO
         return $usuarios;
     }
 
-   
+   /**
+    * Modo	Descripción
+PDO::FETCH_ASSOC	Array asociativo (['nombre' => 'Pan']) ✅
+PDO::FETCH_NUM	Array numérico ([0 => 1, 1 => 'Pan', 2 => 1.20])
+PDO::FETCH_BOTH	Array mixto (tanto numérico como asociativo, por defecto)
+PDO::FETCH_OBJ	Devuelve un objeto stdClass ($fila->nombre)
+PDO::FETCH_CLASS	Mapea resultados directamente a una clase
+PDO::FETCH_BOUND	Asigna columnas a variables enlazadas con bindColumn()
+    */
 }
