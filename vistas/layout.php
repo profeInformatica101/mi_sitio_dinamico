@@ -69,7 +69,7 @@ ini_set('display_errors', '1');
 
           } elseif ($action === 'editar') {
             [$auth, $producto] = ProductoController::datosFormEditar();
-            $cnt = __DIR__ . '/producto/form_editar.php';
+            $cnt = __DIR__ . '/producto/form.php';
 
           } elseif ($action === 'actualizar' && $_SERVER['REQUEST_METHOD'] === 'POST') {
             ProductoController::actualizar(); exit;
