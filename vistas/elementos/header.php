@@ -5,12 +5,16 @@
 $menu = [
   'inicio' => 'Inicio',
   'contenido' => 'Productos',
-  'contacto' => 'Contacto'
+  'contacto' => 'Contacto',
+  'server' => 'Server',
+  'session' => 'Sesiones',
+  'xss' => 'XSS'
+
 ];
 
 ?>
 <header class="text-center bg-white p-3 rounded shadow-sm">
-  <h1 class="text-primary">🌟 Bienvenido a mi primer sitio PHP 🌟</h1>
+  <h1 class="text-primary">🌟 Bienvenido a <b><?= NOMBRE_SITIO ?><b> 🌟</h1>
   <p class="text-muted">Usando include() por primera vez</p>
 <ul class="nav nav-pills">
   <?php foreach ($menu as $clave => $texto): ?>
