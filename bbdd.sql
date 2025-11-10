@@ -29,3 +29,9 @@ CREATE TABLE productos (
   nombre VARCHAR(50) NOT NULL,
   precio DOUBLE NOT NULL
 )ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Ejecuta esto si la tabla 'productos' ya existe
+ALTER TABLE productos
+ADD COLUMN stock INT DEFAULT 0,
+ADD COLUMN descripcion TEXT,
+ADD CONSTRAINT chk_stock_positivo CHECK (stock >= 0);
