@@ -32,14 +32,18 @@ final class ProductoController
 
         $nombre = trim($_POST['nombre'] ?? '');
         $precio = $_POST['precio'] ?? '';
-        if ($nombre === '' || !is_numeric($precio) || (float)$precio < 0) {
+        $descripcion = trim($_POST['descripcion'] ?? '');
+        $stock = $_POST['stock'] ?? '';
+        
+        
+        if ($nombre === '' || !is_numeric($precio) || (float)$precio < 0 || $descripcion === "" ||$stock < 0 ) {
             http_response_code(422);
             echo self::error('Datos inválidos', 'index.php?p=productos&action=nuevo'); return;
         }
 
         $pdo = Database::getConnection();
         $dao = new ProductoDAO($pdo);
-        $p   = new Producto($nombre, (float)$precio);
+        $p   = new Producto($nombre, (float)$precio, (int)$stock, $descripcion);
         $dao->guardar($p); // INSERT
 
         header('Location: index.php?p=contenido'); exit;
@@ -70,14 +74,17 @@ final class ProductoController
         $nombre = trim($_POST['nombre'] ?? '');
         $precio = $_POST['precio'] ?? '';
 
-        if ($id<=0 || $nombre==='' || !is_numeric($precio) || (float)$precio<0) {
+        $descripcion = trim($_POST['descripcion'] ?? '');
+        $stock = $_POST['stock'] ?? '';
+        
+        
+        if ($nombre === '' || !is_numeric($precio) || (float)$precio < 0 || $descripcion === "" ||$stock < 0 ) {
             http_response_code(422);
-            echo self::error('Datos inválidos', 'index.php?p=contenido'); return;
+            echo self::error('Datos inválidos', 'index.php?p=productos&action=nuevo'); return;
         }
-
         $pdo = Database::getConnection();
         $dao = new ProductoDAO($pdo);
-        $p   = new Producto($nombre, (float)$precio);
+        $p   = new Producto($nombre, (float)$precio, (int)$stock, $descripcion);
         $p->setId($id);
         $dao->guardar($p); // UPDATE
 

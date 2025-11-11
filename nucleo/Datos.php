@@ -27,9 +27,9 @@ function semillaProductosDatos(bool $reset = false): int
     $afectadas = 0;
 
     $productos = [
-        ['producto' => 'Pan de Camas',                   'precio' => 1.20],
-        ['producto' => 'Aceitunas aliñadas de Camas',    'precio' => 2.50],
-        ['producto' => 'Tortas de aceite',               'precio' => 3.00],
+        ['producto' => 'Pan de Camas',                   'precio' => 1.20, 'stock' => 3, 'descripcion'=>"Pan bueno"],
+        ['producto' => 'Aceitunas aliñadas de Camas',    'precio' => 2.50 , 'stock' => 36, 'descripcion'=>"Ricas aceitunas"]
+        /*   ['producto' => 'Tortas de aceite',               'precio' => 3.00],
         ['producto' => 'Aceite Virgen Extra “Aljarafe”', 'precio' => 6.80],
         ['producto' => 'Jamón ibérico de recebo',        'precio' => 12.50],
         ['producto' => 'Queso de cabra payoya',          'precio' => 4.75],
@@ -46,7 +46,7 @@ function semillaProductosDatos(bool $reset = false): int
         ['producto' => 'Cervezas artesanas sevillanas',  'precio' => 2.80],
         ['producto' => 'Tomate seco en aceite',          'precio' => 4.20],
         ['producto' => 'Aceite arbequina 250 ml',        'precio' => 5.60],
-        ['producto' => 'Picos de pan artesanos',         'precio' => 1.80],
+        ['producto' => 'Picos de pan artesanos',         'precio' => 1.80],*/
     ];
 
     // Si vas a resetear, hazlo SIEMPRE fuera de la transacción
@@ -54,7 +54,7 @@ function semillaProductosDatos(bool $reset = false): int
         resetTabla($pdo, 'productos');
     }
 
-    $sql = "INSERT INTO productos (nombre, precio) VALUES (:nombre, :precio)";
+    $sql = "INSERT INTO productos (nombre, precio, stock, descripcion) VALUES (:nombre, :precio, :stock, :descripcion)";
     $stmt = $pdo->prepare($sql);
 
     try {
@@ -64,6 +64,8 @@ function semillaProductosDatos(bool $reset = false): int
             $stmt->execute([
                 ':nombre' => (string)($p['producto'] ?? ''),
                 ':precio' => (float)($p['precio'] ?? 0.0),
+                ':stock' => (int)($p['stock']) ?? 0,
+                ':descripcion' => (string)($p['descripcion'] ?? ''),
             ]);
             $afectadas += $stmt->rowCount();
         }
