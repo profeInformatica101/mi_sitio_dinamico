@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/../nucleo/Database.php';
+require_once __DIR__ . '/../nucleo/Utiles.php';
 require_once __DIR__ . '/../modelo/dao/ProductoDAO.php';
 require_once __DIR__ . '/../modelo/Producto.php';
 
@@ -63,6 +64,28 @@ final class ProductoController
         if (!$producto) { http_response_code(404); exit('No encontrado'); }
 
         return [$auth, $producto];
+    }
+    public static function ver():array{
+        // Se obtiene el usuario autenticado (si existe) de la sesión.
+        // Si no hay sesión iniciada o el usuario no está logueado, $auth será null.
+        if (session_status() !== PHP_SESSION_ACTIVE) { session_start(); }
+        $auth = $_SESSION['auth'] ?? null;
+        // Se obtiene el parámetro 'id' enviado por GET (por ejemplo, ?id=1)
+        // Se convierte a entero para evitar inyección o valores no válidos.
+        $id = (int)($_GET['id'] ?? 0);
+        if ($id <= 0) { http_response_code(400); exit('ID inválido'); }
+        
+        $pdo = Database::getConnection();
+        $dao = new ProductoDAO($pdo);
+        $producto = $dao->buscarPorId($id);
+        if (!$producto) {
+            http_response_code(404);
+            include __DIR__ . '/../vistas/error/404.php';
+            exit;
+        }
+        
+        return [$auth, $producto];
+        
     }
 
     public static function actualizar(): void {

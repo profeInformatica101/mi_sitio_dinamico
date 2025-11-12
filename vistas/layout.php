@@ -77,7 +77,11 @@ ini_set('display_errors', '1');
           } elseif ($action === 'eliminar' && $_SERVER['REQUEST_METHOD'] === 'POST') {
             ProductoController::eliminar(); exit;
 
-          } else {
+          }  elseif ($action === 'ver') {
+              [$auth, $producto] = ProductoController::ver();
+              $cnt = __DIR__ . '/producto/detalle.php';
+              
+          }else {
             [$auth, $productos] = ProductoController::datosListado();
             $cnt = __DIR__ . '/producto/lista.php';
           }
